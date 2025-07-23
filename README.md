@@ -6,6 +6,7 @@ A simplified MCP (Model Context Protocol) server for extracting subtitles from v
 
 * **Get Available Subtitles**: List all available subtitle languages for any video
 * **Extract Subtitles**: Download subtitles in original format (SRT/VTT) for any language
+* **Timestamp Control**: Optional `--without-timestamp` parameter to remove timestamps from subtitle output
 * **Multi-Platform Support**: Works with YouTube, Facebook, TikTok, and other yt-dlp supported platforms
 * **Auto-Generated Fallback**: Automatically falls back to machine-generated subtitles when manual ones aren't available
 * **MCP Integration**: Works seamlessly with Claude and other MCP-compatible LLMs
@@ -32,14 +33,31 @@ pip install yt-dlp
 1. Open Claude Desktop settings
 2. Add this MCP server configuration:
 
+**Default mode (with timestamps):**
 ```json
 {
   "mcpServers": {
-    "youtube-subtitles": {
+    "youtube": {
       "command": "npx",
       "args": [
         "-y",
         "@bingyin/youtube-mcp"
+      ]
+    }
+  }
+}
+```
+
+**Without timestamps:**
+```json
+{
+  "mcpServers": {
+    "youtube": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bingyin/youtube-mcp",
+        "--without-timestamp"
       ]
     }
   }
@@ -57,44 +75,28 @@ npm install -g @bingyin/youtube-mcp
 ## Available Tools
 
 ### `get_available_subtitles`
-Get all available subtitle languages for a video, including both manual and auto-generated captions.
+List available subtitle languages for a video.
 
 **Input:**
-- `url` (string, required): Complete video URL from supported platforms
-
-**Example:**
-```
-List available subtitles for: https://youtube.com/watch?v=example
-```
+- `url` (string, required): Video URL
 
 ### `get_subtitles` 
-Download subtitle content for a specific language. Returns raw subtitle file content (typically SRT or VTT format).
+Download subtitle content for a specific language (returns SRT/VTT format).
 
 **Input:**
-- `url` (string, required): Complete video URL
-- `language` (string, optional): Language code such as 'en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', etc. Defaults to 'en'
-
-**Examples:**
-```
-Get English subtitles from: https://youtube.com/watch?v=example
-Get Chinese subtitles from: https://youtube.com/watch?v=example with language zh-Hans
-```
-
-## Usage Examples
-
-Ask your LLM to:
-```
-"Get available subtitles for this video: https://youtube.com/watch?v=..."
-"Extract English subtitles from this YouTube video: https://youtube.com/watch?v=..."
-"Get Chinese subtitles from this TikTok video: https://tiktok.com/@user/video/..."
-"List subtitle languages for this Facebook video: https://facebook.com/watch/?v=..."
-```
+- `url` (string, required): Video URL
+- `language` (string, optional): Language code (e.g., 'en', 'zh', 'ja'). Defaults to 'en'
 
 ## Manual Start
 
-If needed, start the server manually:
+**With timestamps (default):**
 ```bash
 npx @bingyin/youtube-mcp
+```
+
+**Without timestamps:**
+```bash
+npx @bingyin/youtube-mcp --without-timestamp
 ```
 
 ## Requirements
