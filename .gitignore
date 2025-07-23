@@ -33,3 +33,13 @@ test-dist
 .idea/
 
 dist/
+
+# Memory files
+CLAUDE.md
+.claude/
+memory.md
+memory/
+.memory/
+*.memory
+.ai-memory/
+ai-memory/

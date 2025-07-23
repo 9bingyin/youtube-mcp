@@ -13,9 +13,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { CONFIG } from "./config.js";
 import { _spawnPromise, safeCleanup } from "./modules/utils.js";
-import { downloadVideo } from "./modules/video.js";
-import { downloadAudio } from "./modules/audio.js";
-import { listSubtitles, downloadSubtitles, downloadTranscript } from "./modules/subtitle.js";
+import { listSubtitles, downloadSubtitles } from "./modules/subtitle.js";
 
 const VERSION = '0.6.26';
 
@@ -120,46 +118,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["url"],
         },
       },
-      {
-        name: "download_video",
-        description:
-          "Download video to the user's default Downloads folder (usually ~/Downloads).",
-        inputSchema: {
-          type: "object",
-          properties: {
-            url: { type: "string", description: "URL of the video" },
-            resolution: { 
-              type: "string", 
-              description: "Preferred video resolution. For YouTube: '480p', '720p', '1080p', 'best'. For other platforms: '480p' for low quality, '720p'/'1080p' for HD, 'best' for highest quality. Defaults to '720p'",
-              enum: ["480p", "720p", "1080p", "best"]
-            },
-          },
-          required: ["url"],
-        },
-      },
-      {
-        name: "download_audio",
-        description: "Download audio in best available quality (usually m4a/mp3 format) to the user's default Downloads folder (usually ~/Downloads).",
-        inputSchema: {
-          type: "object",
-          properties: {
-            url: { type: "string", description: "URL of the video" },
-          },
-          required: ["url"],
-        },
-      },
-      {
-        name: "download_transcript",
-        description: "Download and clean video subtitles to produce a plain text transcript without timestamps or formatting.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            url: { type: "string", description: "URL of the video" },
-            language: { type: "string", description: "Language code (e.g., 'en', 'zh-Hant', 'ja'). Defaults to 'en'" },
-          },
-          required: ["url"],
-        },
-      },
     ],
   };
 });
@@ -200,7 +158,6 @@ server.setRequestHandler(
     const args = request.params.arguments as { 
       url: string;
       language?: string;
-      resolution?: string;
     };
 
     if (toolName === "list_subtitle_languages") {
@@ -212,21 +169,6 @@ server.setRequestHandler(
       return handleToolExecution(
         () => downloadSubtitles(args.url, args.language || CONFIG.download.defaultSubtitleLanguage, CONFIG),
         "Error downloading subtitles"
-      );
-    } else if (toolName === "download_video") {
-      return handleToolExecution(
-        () => downloadVideo(args.url, CONFIG, args.resolution as "480p" | "720p" | "1080p" | "best"),
-        "Error downloading video"
-      );
-    } else if (toolName === "download_audio") {
-      return handleToolExecution(
-        () => downloadAudio(args.url, CONFIG),
-        "Error downloading audio"
-      );
-    } else if (toolName === "download_transcript") {
-      return handleToolExecution(
-        () => downloadTranscript(args.url, args.language || CONFIG.download.defaultSubtitleLanguage, CONFIG),
-        "Error downloading transcript"
       );
     } else {
       return {

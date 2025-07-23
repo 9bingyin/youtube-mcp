@@ -3,7 +3,7 @@
 import { describe, test, expect } from '@jest/globals';
 import * as os from 'os';
 import * as path from 'path';
-import { downloadVideo } from '../modules/video.js';
+import { listSubtitles, downloadSubtitles } from '../modules/subtitle.js';
 import { CONFIG } from '../config.js';
 import * as fs from 'fs';
 
@@ -11,7 +11,7 @@ import * as fs from 'fs';
 process.env.PYTHONPATH = '';
 process.env.PYTHONHOME = '';
 
-describe('downloadVideo', () => {
+describe('subtitle functions', () => {
   const testUrl = 'https://www.youtube.com/watch?v=jNQXAC9IVRw';
   const testConfig = {
     ...CONFIG,
@@ -30,27 +30,15 @@ describe('downloadVideo', () => {
     await fs.promises.rm(testConfig.file.downloadsDir, { recursive: true, force: true });
   });
 
-  test('downloads video successfully with correct format', async () => {
-    const result = await downloadVideo(testUrl, testConfig);
-    expect(result).toContain('Video successfully downloaded');
-    
-    const files = await fs.promises.readdir(testConfig.file.downloadsDir);
-    expect(files.length).toBeGreaterThan(0);
-    expect(files[0]).toMatch(/\.(mp4|webm|mkv)$/);
+  test('listSubtitles should return available subtitles', async () => {
+    const result = await listSubtitles(testUrl);
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
   }, 30000);
 
-  test('uses correct resolution format', async () => {
-    const result = await downloadVideo(testUrl, testConfig, '1080p');
-    expect(result).toContain('Video successfully downloaded');
-    
-    const files = await fs.promises.readdir(testConfig.file.downloadsDir);
-    expect(files.length).toBeGreaterThan(0);
-    expect(files[0]).toMatch(/\.(mp4|webm|mkv)$/);
+  test('downloadSubtitles should download subtitles', async () => {
+    const result = await downloadSubtitles(testUrl, 'en', testConfig);
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
   }, 30000);
-
-  test('handles invalid URL', async () => {
-    await expect(downloadVideo('invalid-url', testConfig))
-      .rejects
-      .toThrow();
-  });
 }); 

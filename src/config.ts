@@ -32,8 +32,6 @@ export interface Config {
   };
   // 下載相關配置
   download: {
-    defaultResolution: "480p" | "720p" | "1080p" | "best";
-    defaultAudioFormat: "m4a" | "mp3";
     defaultSubtitleLanguage: string;
   };
 }
@@ -61,8 +59,6 @@ const defaultConfig: Config = {
     required: ['yt-dlp']
   },
   download: {
-    defaultResolution: "720p",
-    defaultAudioFormat: "m4a",
     defaultSubtitleLanguage: "en"
   }
 };
@@ -99,14 +95,6 @@ function loadEnvConfig(): DeepPartial<Config> {
 
   // 下載配置
   const downloadConfig: Partial<Config['download']> = {};
-  if (process.env.YTDLP_DEFAULT_RESOLUTION && 
-      ['480p', '720p', '1080p', 'best'].includes(process.env.YTDLP_DEFAULT_RESOLUTION)) {
-    downloadConfig.defaultResolution = process.env.YTDLP_DEFAULT_RESOLUTION as Config['download']['defaultResolution'];
-  }
-  if (process.env.YTDLP_DEFAULT_AUDIO_FORMAT && 
-      ['m4a', 'mp3'].includes(process.env.YTDLP_DEFAULT_AUDIO_FORMAT)) {
-    downloadConfig.defaultAudioFormat = process.env.YTDLP_DEFAULT_AUDIO_FORMAT as Config['download']['defaultAudioFormat'];
-  }
   if (process.env.YTDLP_DEFAULT_SUBTITLE_LANG) {
     downloadConfig.defaultSubtitleLanguage = process.env.YTDLP_DEFAULT_SUBTITLE_LANG;
   }
@@ -136,16 +124,6 @@ function validateConfig(config: Config): void {
     throw new Error('tempDirPrefix must be specified');
   }
 
-  // 驗證默認分辨率
-  if (!['480p', '720p', '1080p', 'best'].includes(config.download.defaultResolution)) {
-    throw new Error('Invalid defaultResolution');
-  }
-
-  // 驗證默認音頻格式
-  if (!['m4a', 'mp3'].includes(config.download.defaultAudioFormat)) {
-    throw new Error('Invalid defaultAudioFormat');
-  }
-
   // 驗證默認字幕語言
   if (!/^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$/i.test(config.download.defaultSubtitleLanguage)) {
     throw new Error('Invalid defaultSubtitleLanguage');
@@ -172,8 +150,6 @@ function mergeConfig(base: Config, override: DeepPartial<Config>): Config {
       required: (override.tools?.required || base.tools.required) as readonly string[]
     },
     download: {
-      defaultResolution: override.download?.defaultResolution || base.download.defaultResolution,
-      defaultAudioFormat: override.download?.defaultAudioFormat || base.download.defaultAudioFormat,
       defaultSubtitleLanguage: override.download?.defaultSubtitleLanguage || base.download.defaultSubtitleLanguage
     }
   };
