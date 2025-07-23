@@ -12,7 +12,7 @@ import { CONFIG } from "./config.js";
 import { _spawnPromise } from "./modules/utils.js";
 import { listSubtitles, downloadSubtitles } from "./modules/subtitle.js";
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 
 /**
  * Validate system configuration
@@ -75,7 +75,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "get_available_subtitles",
-        description: "Get all available subtitle languages for a video, including both manual and auto-generated captions. Supports videos from YouTube, Facebook, TikTok and other platforms.",
+        description: "Get all available subtitle languages for a video, including both manual and auto-generated captions. Excludes auto-translated subtitles (machine translations from other languages). Supports videos from YouTube, Facebook, TikTok and other platforms.",
         inputSchema: {
           type: "object",
           properties: {

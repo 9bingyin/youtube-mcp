@@ -31,10 +31,41 @@ export async function listSubtitles(url: string): Promise<string> {
       '--list-subs',
       '--write-auto-sub',
       '--skip-download',
-      '--verbose',
       url
     ]);
-    return output;
+    
+    // Filter out auto-translated subtitles (those containing " from ")
+    // Also filter out debug information and verbose output
+    // Keep manual subtitles and auto-generated subtitles
+    const lines = output.split('\n');
+    const filteredLines = lines.filter(line => {
+      // Keep lines that don't contain " from " (which indicates auto-translation)
+      if (line.includes(' from ')) return false;
+      
+      // Filter out debug and verbose information
+      if (line.startsWith('[debug]')) return false;
+      if (line.startsWith('[youtube]')) return false;
+      if (line.includes('Downloading')) return false;
+      if (line.includes('Extracting URL')) return false;
+      if (line.includes('Command-line config')) return false;
+      if (line.includes('Encodings:')) return false;
+      if (line.includes('Python ')) return false;
+      if (line.includes('exe versions:')) return false;
+      if (line.includes('Optional libraries:')) return false;
+      if (line.includes('Proxy map:')) return false;
+      if (line.includes('Request Handlers:')) return false;
+      if (line.includes('Plugin directories:')) return false;
+      if (line.includes('Loaded ')) return false;
+      if (line.includes('PO Token')) return false;
+      if (line.includes('Decrypted nsig')) return false;
+      if (line.includes('Sort order')) return false;
+      if (line.includes('Formats sorted')) return false;
+      if (line.includes('GVS PO Token')) return false;
+      
+      return true;
+    });
+    
+    return filteredLines.join('\n');
   } catch (error) {
     throw error;
   }
