@@ -8,11 +8,8 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import type { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 
-import * as os from "os";
-import * as fs from "fs";
-import * as path from "path";
 import { CONFIG } from "./config.js";
-import { _spawnPromise, safeCleanup } from "./modules/utils.js";
+import { _spawnPromise } from "./modules/utils.js";
 import { listSubtitles, downloadSubtitles } from "./modules/subtitle.js";
 
 const VERSION = '0.6.26';
@@ -22,27 +19,8 @@ const VERSION = '0.6.26';
  * @throws {Error} when configuration is invalid
  */
 async function validateConfig(): Promise<void> {
-  // Check downloads directory
-  if (!fs.existsSync(CONFIG.file.downloadsDir)) {
-    throw new Error(`Downloads directory does not exist: ${CONFIG.file.downloadsDir}`);
-  }
-
-  // Check downloads directory permissions
-  try {
-    const testFile = path.join(CONFIG.file.downloadsDir, '.write-test');
-    fs.writeFileSync(testFile, '');
-    fs.unlinkSync(testFile);
-  } catch (error) {
-    throw new Error(`No write permission in downloads directory: ${CONFIG.file.downloadsDir}`);
-  }
-
-  // Check temporary directory permissions
-  try {
-    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), CONFIG.file.tempDirPrefix));
-    await safeCleanup(testDir);
-  } catch (error) {
-    throw new Error(`Cannot create temporary directory in: ${os.tmpdir()}`);
-  }
+  // Configuration validation - no file system checks needed
+  // yt-dlp will handle temporary directory creation as needed
 }
 
 /**
@@ -177,7 +155,7 @@ server.setRequestHandler(
       );
     } else if (toolName === "get_subtitles") {
       return handleToolExecution(
-        () => downloadSubtitles(args.url, args.language || CONFIG.download.defaultSubtitleLanguage, CONFIG),
+        () => downloadSubtitles(args.url, args.language || CONFIG.download.defaultSubtitleLanguage),
         "Error downloading subtitles"
       );
     } else {

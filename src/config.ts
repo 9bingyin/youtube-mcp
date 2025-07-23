@@ -1,4 +1,3 @@
-import * as os from "os";
 import * as path from "path";
 
 type DeepPartial<T> = {
@@ -12,8 +11,6 @@ export interface Config {
   // 文件相關配置
   file: {
     maxFilenameLength: number;
-    downloadsDir: string;
-    tempDirPrefix: string;
     // 文件名處理相關配置
     sanitize: {
       // 替換非法字符為此字符
@@ -42,8 +39,6 @@ export interface Config {
 const defaultConfig: Config = {
   file: {
     maxFilenameLength: 50,
-    downloadsDir: path.join(os.homedir(), "Downloads"),
-    tempDirPrefix: "ytdlp-",
     sanitize: {
       replaceChar: '_',
       truncateSuffix: '...',
@@ -82,12 +77,6 @@ function loadEnvConfig(): DeepPartial<Config> {
   if (process.env.YTDLP_MAX_FILENAME_LENGTH) {
     fileConfig.maxFilenameLength = parseInt(process.env.YTDLP_MAX_FILENAME_LENGTH);
   }
-  if (process.env.YTDLP_DOWNLOADS_DIR) {
-    fileConfig.downloadsDir = process.env.YTDLP_DOWNLOADS_DIR;
-  }
-  if (process.env.YTDLP_TEMP_DIR_PREFIX) {
-    fileConfig.tempDirPrefix = process.env.YTDLP_TEMP_DIR_PREFIX;
-  }
 
   if (Object.keys(fileConfig).length > 0) {
     envConfig.file = fileConfig;
@@ -114,16 +103,6 @@ function validateConfig(config: Config): void {
     throw new Error('maxFilenameLength must be at least 5');
   }
 
-  // 驗證下載目錄
-  if (!config.file.downloadsDir) {
-    throw new Error('downloadsDir must be specified');
-  }
-
-  // 驗證臨時目錄前綴
-  if (!config.file.tempDirPrefix) {
-    throw new Error('tempDirPrefix must be specified');
-  }
-
   // 驗證默認字幕語言
   if (!/^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$/i.test(config.download.defaultSubtitleLanguage)) {
     throw new Error('Invalid defaultSubtitleLanguage');
@@ -137,8 +116,6 @@ function mergeConfig(base: Config, override: DeepPartial<Config>): Config {
   return {
     file: {
       maxFilenameLength: override.file?.maxFilenameLength || base.file.maxFilenameLength,
-      downloadsDir: override.file?.downloadsDir || base.file.downloadsDir,
-      tempDirPrefix: override.file?.tempDirPrefix || base.file.tempDirPrefix,
       sanitize: {
         replaceChar: override.file?.sanitize?.replaceChar || base.file.sanitize.replaceChar,
         truncateSuffix: override.file?.sanitize?.truncateSuffix || base.file.sanitize.truncateSuffix,

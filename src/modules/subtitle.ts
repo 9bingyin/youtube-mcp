@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import type { Config } from '../config.js';
 import { _spawnPromise, validateUrl } from "./utils.js";
 
 /**
@@ -71,14 +70,13 @@ export async function listSubtitles(url: string): Promise<string> {
  */
 export async function downloadSubtitles(
   url: string,
-  language: string,
-  config: Config
+  language: string
 ): Promise<string> {
   if (!validateUrl(url)) {
     throw new Error('Invalid or unsupported URL format');
   }
 
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), config.file.tempDirPrefix));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-mcp-'));
 
   try {
     await _spawnPromise('yt-dlp', [

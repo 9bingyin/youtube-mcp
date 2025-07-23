@@ -3,8 +3,6 @@ import type { Config } from '../config.js';
 export const mockConfig: Config = {
   file: {
     maxFilenameLength: 100,
-    downloadsDir: '/mock/downloads',
-    tempDirPrefix: 'ytdlp-test-',
     sanitize: {
       replaceChar: '_',
       truncateSuffix: '...',
@@ -16,8 +14,6 @@ export const mockConfig: Config = {
     required: ['yt-dlp']
   },
   download: {
-    defaultResolution: '720p',
-    defaultAudioFormat: 'm4a',
     defaultSubtitleLanguage: 'en'
   }
 }; 
