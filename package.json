@@ -1,6 +1,6 @@
 {
   "name": "@bingyin/youtube-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simplified MCP server for extracting subtitles from videos. Supports YouTube, Facebook, TikTok and other platforms via yt-dlp.",
   "keywords": [
     "mcp",

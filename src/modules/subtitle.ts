@@ -9,7 +9,8 @@ import { _spawnPromise, validateUrl } from "./utils.js";
  * @returns Content without timestamps
  */
 function removeTimestamps(content: string): string {
-  const lines = content.split('\n');
+  // Handle different line endings (Windows CRLF, Unix LF, Mac CR)
+  const lines = content.split(/\r?\n/);
   const result: string[] = [];
   
   for (let i = 0; i < lines.length; i++) {
@@ -28,8 +29,10 @@ function removeTimestamps(content: string): string {
       continue;
     }
     
-    // Skip timestamp lines with more precise regex
-    if (/^\d{2}:\d{2}:\d{2}[.,]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}[.,]\d{3}$/.test(line)) {
+    // Skip timestamp lines - comprehensive regex to handle WebVTT positioning
+    // Matches: HH:MM:SS.mmm --> HH:MM:SS.mmm [optional cue settings]
+    // Cue settings include: position:X%, line:X%|X, align:start|middle|end, size:X%, vertical:rl|lr
+    if (/^\d{2}:\d{2}:\d{2}[.,]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}[.,]\d{3}(?:\s+(?:position:\d+%|line:-?\d+%?|align:(?:start|middle|end)|size:\d+%|vertical:(?:rl|lr)))*\s*$/.test(line)) {
       continue;
     }
     
