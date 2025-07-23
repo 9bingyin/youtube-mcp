@@ -12,7 +12,17 @@ import { CONFIG } from "./config.js";
 import { _spawnPromise } from "./modules/utils.js";
 import { listSubtitles, downloadSubtitles } from "./modules/subtitle.js";
 
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const WITHOUT_TIMESTAMP = args.includes('--without-timestamp');
+
+// Global configuration
+const GLOBAL_CONFIG = {
+  ...CONFIG,
+  withoutTimestamp: WITHOUT_TIMESTAMP
+};
 
 /**
  * Validate system configuration
@@ -28,7 +38,7 @@ async function validateConfig(): Promise<void> {
  * @throws {Error} when dependencies are not satisfied
  */
 async function checkDependencies(): Promise<void> {
-  for (const tool of CONFIG.tools.required) {
+  for (const tool of GLOBAL_CONFIG.tools.required) {
     try {
       await _spawnPromise(tool, ["--version"]);
     } catch (error) {
@@ -75,13 +85,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "get_available_subtitles",
-        description: "Get all available subtitle languages for a video, including both manual and auto-generated captions. Excludes auto-translated subtitles (machine translations from other languages). Supports videos from YouTube, Facebook, TikTok and other platforms.",
+        description: "List available subtitle languages for a video.",
         inputSchema: {
           type: "object",
           properties: {
             url: { 
               type: "string", 
-              description: "Complete video URL from supported platforms (YouTube, Facebook, TikTok, etc.)" 
+              description: "Video URL" 
             },
           },
           required: ["url"],
@@ -89,17 +99,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_subtitles",
-        description: "Download subtitle content for a specific language. Prioritizes manual subtitles and falls back to auto-generated ones if unavailable. Returns raw subtitle file content (typically SRT or VTT format).",
+        description: "Download subtitle content for a specific language (returns SRT/VTT format).",
         inputSchema: {
           type: "object",
           properties: {
             url: { 
               type: "string", 
-              description: "Complete video URL" 
+              description: "Video URL" 
             },
             language: { 
               type: "string", 
-              description: "Language code such as 'en' (English), 'zh-Hans' (Simplified Chinese), 'zh-Hant' (Traditional Chinese), 'ja' (Japanese), 'ko' (Korean), etc. Defaults to 'en'",
+              description: "Language code. Defaults to 'en'",
               default: "en"
             },
           },
@@ -155,7 +165,7 @@ server.setRequestHandler(
       );
     } else if (toolName === "get_subtitles") {
       return handleToolExecution(
-        () => downloadSubtitles(args.url, args.language || CONFIG.download.defaultSubtitleLanguage),
+        () => downloadSubtitles(args.url, args.language || GLOBAL_CONFIG.download.defaultSubtitleLanguage, GLOBAL_CONFIG.withoutTimestamp),
         "Error downloading subtitles"
       );
     } else {

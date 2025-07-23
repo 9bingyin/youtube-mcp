@@ -31,6 +31,10 @@ export interface Config {
   download: {
     defaultSubtitleLanguage: string;
   };
+  // 字幕处理配置
+  subtitle: {
+    withoutTimestamp: boolean;
+  };
 }
 
 /**
@@ -55,6 +59,9 @@ const defaultConfig: Config = {
   },
   download: {
     defaultSubtitleLanguage: "en"
+  },
+  subtitle: {
+    withoutTimestamp: false
   }
 };
 
@@ -128,6 +135,9 @@ function mergeConfig(base: Config, override: DeepPartial<Config>): Config {
     },
     download: {
       defaultSubtitleLanguage: override.download?.defaultSubtitleLanguage || base.download.defaultSubtitleLanguage
+    },
+    subtitle: {
+      withoutTimestamp: override.subtitle?.withoutTimestamp ?? base.subtitle.withoutTimestamp
     }
   };
 }

@@ -4,6 +4,46 @@ import * as os from "os";
 import { _spawnPromise, validateUrl } from "./utils.js";
 
 /**
+ * Remove timestamps from subtitle content
+ * @param content - The subtitle file content
+ * @returns Content without timestamps
+ */
+function removeTimestamps(content: string): string {
+  const lines = content.split('\n');
+  const result: string[] = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Skip empty lines
+    if (!line) continue;
+    
+    // Skip VTT headers
+    if (line === 'WEBVTT' || line.startsWith('Kind:') || line.startsWith('Language:')) {
+      continue;
+    }
+    
+    // Skip SRT sequence numbers (just numbers)
+    if (/^\d+$/.test(line)) {
+      continue;
+    }
+    
+    // Skip timestamp lines with more precise regex
+    if (/^\d{2}:\d{2}:\d{2}[.,]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2}[.,]\d{3}$/.test(line)) {
+      continue;
+    }
+    
+    // Clean HTML tags and keep subtitle text content
+    const cleanedLine = line.replace(/<[^>]*>/g, '');
+    if (cleanedLine.trim()) {
+      result.push(cleanedLine.trim());
+    }
+  }
+  
+  return result.join('\n').trim();
+}
+
+/**
  * Lists all available subtitles for a video.
  * 
  * @param url - The URL of the video
@@ -76,7 +116,7 @@ export async function listSubtitles(url: string): Promise<string> {
  * 
  * @param url - The URL of the video
  * @param language - Language code (e.g., 'en', 'zh-Hant', 'ja')
- * @param config - Configuration object
+ * @param withoutTimestamp - Whether to remove timestamps from the output
  * @returns Promise resolving to the subtitle content
  * @throws {Error} When URL is invalid, language is not available, or download fails
  * 
@@ -84,11 +124,11 @@ export async function listSubtitles(url: string): Promise<string> {
  * ```typescript
  * try {
  *   // Download English subtitles
- *   const enSubs = await downloadSubtitles('https://youtube.com/watch?v=...', 'en', config);
+ *   const enSubs = await downloadSubtitles('https://youtube.com/watch?v=...', 'en', false);
  *   console.log('English subtitles:', enSubs);
  * 
- *   // Download Traditional Chinese subtitles
- *   const zhSubs = await downloadSubtitles('https://youtube.com/watch?v=...', 'zh-Hant', config);
+ *   // Download without timestamps
+ *   const zhSubs = await downloadSubtitles('https://youtube.com/watch?v=...', 'zh-Hant', true);
  *   console.log('Chinese subtitles:', zhSubs);
  * } catch (error) {
  *   if (error.message.includes('No subtitle files found')) {
@@ -101,7 +141,8 @@ export async function listSubtitles(url: string): Promise<string> {
  */
 export async function downloadSubtitles(
   url: string,
-  language: string
+  language: string,
+  withoutTimestamp: boolean = false
 ): Promise<string> {
   if (!validateUrl(url)) {
     throw new Error('Invalid or unsupported URL format');
@@ -130,6 +171,11 @@ export async function downloadSubtitles(
     let output = '';
     for (const file of subtitleFiles) {
       output += fs.readFileSync(path.join(tempDir, file), 'utf8');
+    }
+
+    // Remove timestamps if requested
+    if (withoutTimestamp) {
+      output = removeTimestamps(output);
     }
 
     return output;
