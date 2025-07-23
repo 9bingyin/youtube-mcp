@@ -12,7 +12,7 @@ import { CONFIG } from "./config.js";
 import { _spawnPromise } from "./modules/utils.js";
 import { listSubtitles, downloadSubtitles } from "./modules/subtitle.js";
 
-const VERSION = '1.0.3';
+const VERSION = '1.0.4';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
