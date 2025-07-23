@@ -96,24 +96,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: "list_subtitle_languages",
-        description: "List all available subtitle languages and their formats for a video (including auto-generated captions)",
+        name: "get_available_subtitles",
+        description: "Get all available subtitle languages for a video, including both manual and auto-generated captions. Supports videos from YouTube, Facebook, TikTok and other platforms.",
         inputSchema: {
           type: "object",
           properties: {
-            url: { type: "string", description: "URL of the video" },
+            url: { 
+              type: "string", 
+              description: "Complete video URL from supported platforms (YouTube, Facebook, TikTok, etc.)" 
+            },
           },
           required: ["url"],
         },
       },
       {
-        name: "download_video_subtitles",
-        description: "Download video subtitles in any available format. Supports both regular and auto-generated subtitles in various languages.",
+        name: "get_subtitles",
+        description: "Download subtitle content for a specific language. Prioritizes manual subtitles and falls back to auto-generated ones if unavailable. Returns raw subtitle file content (typically SRT or VTT format).",
         inputSchema: {
           type: "object",
           properties: {
-            url: { type: "string", description: "URL of the video" },
-            language: { type: "string", description: "Language code (e.g., 'en', 'zh-Hant', 'ja'). Will try to get auto-generated subtitles if regular subtitles are not available." },
+            url: { 
+              type: "string", 
+              description: "Complete video URL" 
+            },
+            language: { 
+              type: "string", 
+              description: "Language code such as 'en' (English), 'zh-Hans' (Simplified Chinese), 'zh-Hant' (Traditional Chinese), 'ja' (Japanese), 'ko' (Korean), etc. Defaults to 'en'",
+              default: "en"
+            },
           },
           required: ["url"],
         },
@@ -160,12 +170,12 @@ server.setRequestHandler(
       language?: string;
     };
 
-    if (toolName === "list_subtitle_languages") {
+    if (toolName === "get_available_subtitles") {
       return handleToolExecution(
         () => listSubtitles(args.url),
         "Error listing subtitle languages"
       );
-    } else if (toolName === "download_video_subtitles") {
+    } else if (toolName === "get_subtitles") {
       return handleToolExecution(
         () => downloadSubtitles(args.url, args.language || CONFIG.download.defaultSubtitleLanguage, CONFIG),
         "Error downloading subtitles"

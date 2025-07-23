@@ -1,14 +1,14 @@
-# yt-dlp-mcp
+# youtube-mcp
 
-An MCP server implementation that integrates with yt-dlp, providing video and audio content download capabilities (e.g. YouTube, Facebook, Tiktok, etc.) for LLMs.
+A simplified MCP (Model Context Protocol) server for extracting subtitles from videos. Supports YouTube, Facebook, TikTok and other platforms via yt-dlp.
 
 ## Features
 
-* **Subtitles**: Download subtitles in SRT format for LLMs to read
-* **Video Download**: Save videos to your Downloads folder with resolution control
-* **Audio Download**: Save audios to your Downloads folder
-* **Privacy-Focused**: Direct download without tracking
-* **MCP Integration**: Works with Dive and other MCP-compatible LLMs
+* **Get Available Subtitles**: List all available subtitle languages for any video
+* **Extract Subtitles**: Download subtitles in original format (SRT/VTT) for any language
+* **Multi-Platform Support**: Works with YouTube, Facebook, TikTok, and other yt-dlp supported platforms
+* **Auto-Generated Fallback**: Automatically falls back to machine-generated subtitles when manual ones aren't available
+* **MCP Integration**: Works seamlessly with Claude and other MCP-compatible LLMs
 
 ## Installation
 
@@ -27,74 +27,74 @@ brew install yt-dlp
 pip install yt-dlp
 ```
 
-### With [Dive Desktop](https://github.com/OpenAgentPlatform/Dive)
+### With [Claude Desktop](https://claude.ai/desktop)
 
-1. Click "+ Add MCP Server" in Dive Desktop
-2. Copy and paste this configuration:
+1. Open Claude Desktop settings
+2. Add this MCP server configuration:
 
 ```json
 {
   "mcpServers": {
-    "yt-dlp": {
+    "youtube-subtitles": {
       "command": "npx",
       "args": [
         "-y",
-        "@kevinwatt/yt-dlp-mcp"
+        "@bingyin/youtube-mcp"
       ]
     }
   }
 }
 ```
-3. Click "Save" to install the MCP server
 
-## Tool Documentation
+3. Restart Claude Desktop
 
-* **list_subtitle_languages**
-  * List all available subtitle languages and their formats for a video (including auto-generated captions)
-  * Inputs:
-    * `url` (string, required): URL of the video
+### Manual Installation
 
-* **download_video_subtitles**
-  * Download video subtitles in any available format. Supports both regular and auto-generated subtitles
-  * Inputs:
-    * `url` (string, required): URL of the video
-    * `language` (string, optional): Language code (e.g., 'en', 'zh-Hant', 'ja'). Defaults to 'en'
+```bash
+npm install -g @bingyin/youtube-mcp
+```
 
-* **download_video**
-  * Download video to user's Downloads folder
-  * Inputs:
-    * `url` (string, required): URL of the video
-    * `resolution` (string, optional): Video resolution ('480p', '720p', '1080p', 'best'). Defaults to '720p'
+## Available Tools
 
-* **download_audio**
-  * Download audio in best available quality (usually m4a/mp3 format) to user's Downloads folder
-  * Inputs:
-    * `url` (string, required): URL of the video
+### `get_available_subtitles`
+Get all available subtitle languages for a video, including both manual and auto-generated captions.
 
-* **download_transcript**
-  * Download and clean video subtitles to produce a plain text transcript without timestamps or formatting
-  * Inputs:
-    * `url` (string, required): URL of the video
-    * `language` (string, optional): Language code (e.g., 'en', 'zh-Hant', 'ja'). Defaults to 'en'
+**Input:**
+- `url` (string, required): Complete video URL from supported platforms
+
+**Example:**
+```
+List available subtitles for: https://youtube.com/watch?v=example
+```
+
+### `get_subtitles` 
+Download subtitle content for a specific language. Returns raw subtitle file content (typically SRT or VTT format).
+
+**Input:**
+- `url` (string, required): Complete video URL
+- `language` (string, optional): Language code such as 'en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', etc. Defaults to 'en'
+
+**Examples:**
+```
+Get English subtitles from: https://youtube.com/watch?v=example
+Get Chinese subtitles from: https://youtube.com/watch?v=example with language zh-Hans
+```
 
 ## Usage Examples
 
 Ask your LLM to:
 ```
-"List available subtitles for this video: https://youtube.com/watch?v=..."
-"Download a video from facebook: https://facebook.com/..."
-"Download Chinese subtitles from this video: https://youtube.com/watch?v=..."
-"Download this video in 1080p: https://youtube.com/watch?v=..."
-"Download audio from this YouTube video: https://youtube.com/watch?v=..."
-"Get a clean transcript of this video: https://youtube.com/watch?v=..."
-"Download Spanish transcript from this video: https://youtube.com/watch?v=..."
+"Get available subtitles for this video: https://youtube.com/watch?v=..."
+"Extract English subtitles from this YouTube video: https://youtube.com/watch?v=..."
+"Get Chinese subtitles from this TikTok video: https://tiktok.com/@user/video/..."
+"List subtitle languages for this Facebook video: https://facebook.com/watch/?v=..."
 ```
 
 ## Manual Start
 
 If needed, start the server manually:
 ```bash
-npx @kevinwatt/yt-dlp-mcp
+npx @bingyin/youtube-mcp
 ```
 
 ## Requirements
@@ -103,6 +103,15 @@ npx @kevinwatt/yt-dlp-mcp
 * `yt-dlp` in system PATH
 * MCP-compatible LLM service
 
+## Supported Platforms
+
+Thanks to yt-dlp, this tool supports subtitle extraction from:
+- YouTube
+- Facebook
+- TikTok  
+- Instagram
+- Twitter/X
+- And 1000+ other sites
 
 ## Documentation
 
@@ -111,7 +120,6 @@ npx @kevinwatt/yt-dlp-mcp
 - [Error Handling](./docs/error-handling.md)
 - [Contributing](./docs/contributing.md)
 
-
 ## License
 
 MIT
@@ -119,5 +127,11 @@ MIT
 ## Author
 
 Dewei Yen
+
+Bingyin
+
+## Acknowledgments
+
+This project is based on [yt-dlp-mcp](https://github.com/kevinwatt/yt-dlp-mcp) by Dewei Yen, simplified to focus on subtitle extraction functionality.
 
 

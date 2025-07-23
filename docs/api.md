@@ -1,58 +1,55 @@
 # API Reference
 
-## Video Operations
+## MCP Tools
 
-### downloadVideo(url: string, config?: Config, resolution?: string): Promise<string>
+This package provides two MCP tools for subtitle extraction:
 
-Downloads a video from the specified URL.
+### get_available_subtitles
 
-**Parameters:**
-- `url`: The URL of the video to download
-- `config`: (Optional) Configuration object
-- `resolution`: (Optional) Preferred video resolution ('480p', '720p', '1080p', 'best')
+Lists all available subtitle languages for a video, including both manual and auto-generated captions.
 
-**Returns:**
-- Promise resolving to a success message with the downloaded file path
-
-**Example:**
-```javascript
-import { downloadVideo } from '@kevinwatt/yt-dlp-mcp';
-
-// Download with default settings
-const result = await downloadVideo('https://www.youtube.com/watch?v=jNQXAC9IVRw');
-console.log(result);
-
-// Download with specific resolution
-const hdResult = await downloadVideo(
-  'https://www.youtube.com/watch?v=jNQXAC9IVRw',
-  undefined,
-  '1080p'
-);
-console.log(hdResult);
-```
-
-## Audio Operations
-
-### downloadAudio(url: string, config?: Config): Promise<string>
-
-Downloads audio from the specified URL in the best available quality.
+**MCP Tool Name:** `get_available_subtitles`
 
 **Parameters:**
-- `url`: The URL of the video to extract audio from
-- `config`: (Optional) Configuration object
+- `url` (string, required): Complete video URL from supported platforms
 
 **Returns:**
-- Promise resolving to a success message with the downloaded file path
+- String containing the list of available subtitles with language codes and formats
 
-**Example:**
-```javascript
-import { downloadAudio } from '@kevinwatt/yt-dlp-mcp';
-
-const result = await downloadAudio('https://www.youtube.com/watch?v=jNQXAC9IVRw');
-console.log(result);
+**Usage Example:**
+```
+Tool: get_available_subtitles
+Input: { "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw" }
 ```
 
-## Subtitle Operations
+### get_subtitles
+
+Downloads subtitle content for a specific language. Prioritizes manual subtitles and falls back to auto-generated ones if unavailable.
+
+**MCP Tool Name:** `get_subtitles`
+
+**Parameters:**
+- `url` (string, required): Complete video URL
+- `language` (string, optional): Language code such as 'en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', etc. Defaults to 'en'
+
+**Returns:**
+- Raw subtitle file content (typically SRT or VTT format)
+
+**Usage Examples:**
+```
+Tool: get_subtitles
+Input: { "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw" }
+
+Tool: get_subtitles
+Input: { 
+  "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw", 
+  "language": "zh-Hans" 
+}
+```
+
+## Internal Functions
+
+These functions are used internally by the MCP tools:
 
 ### listSubtitles(url: string): Promise<string>
 
@@ -66,30 +63,33 @@ Lists all available subtitles for a video.
 
 **Example:**
 ```javascript
-import { listSubtitles } from '@kevinwatt/yt-dlp-mcp';
+import { listSubtitles } from '@bingyin/youtube-mcp';
 
 const subtitles = await listSubtitles('https://www.youtube.com/watch?v=jNQXAC9IVRw');
 console.log(subtitles);
 ```
 
-### downloadSubtitles(url: string, language: string): Promise<string>
+### downloadSubtitles(url: string, language: string, config: Config): Promise<string>
 
 Downloads subtitles for a video in the specified language.
 
 **Parameters:**
 - `url`: The URL of the video
 - `language`: Language code (e.g., 'en', 'zh-Hant', 'ja')
+- `config`: Configuration object
 
 **Returns:**
 - Promise resolving to the subtitle content
 
 **Example:**
 ```javascript
-import { downloadSubtitles } from '@kevinwatt/yt-dlp-mcp';
+import { downloadSubtitles } from '@bingyin/youtube-mcp';
+import { CONFIG } from '@bingyin/youtube-mcp';
 
 const subtitles = await downloadSubtitles(
   'https://www.youtube.com/watch?v=jNQXAC9IVRw',
-  'en'
+  'en',
+  CONFIG
 );
 console.log(subtitles);
 ```
@@ -115,11 +115,22 @@ interface Config {
     required: readonly string[];
   };
   download: {
-    defaultResolution: "480p" | "720p" | "1080p" | "best";
-    defaultAudioFormat: "m4a" | "mp3";
     defaultSubtitleLanguage: string;
   };
 }
 ```
+
+## Supported Platforms
+
+Thanks to yt-dlp integration, this tool supports subtitle extraction from:
+
+- YouTube
+- Facebook  
+- TikTok
+- Instagram
+- Twitter/X
+- Vimeo
+- Dailymotion
+- And 1000+ other sites
 
 For detailed configuration options, see [Configuration Guide](./configuration.md). 

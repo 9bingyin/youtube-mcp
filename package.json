@@ -1,24 +1,28 @@
 {
-  "name": "@kevinwatt/yt-dlp-mcp",
-  "version": "0.6.26",
-  "description": "An MCP server implementation that integrates with yt-dlp, providing video and audio content download capabilities (e.g. YouTube, Facebook, Tiktok, etc.) for LLMs.",
+  "name": "@bingyin/youtube-mcp",
+  "version": "0.0.1",
+  "description": "A simplified MCP server for extracting subtitles from videos. Supports YouTube, Facebook, TikTok and other platforms via yt-dlp.",
   "keywords": [
     "mcp",
+    "subtitles",
+    "captions",
     "youtube",
     "yt-dlp",
-    "dive",
-    "llm"
+    "video",
+    "transcript",
+    "llm",
+    "claude"
   ],
-  "homepage": "https://github.com/kevinwatt/yt-dlp-mcp#readme",
+  "homepage": "https://github.com/9bingyin/youtube-mcp#readme",
   "bugs": {
-    "url": "https://github.com/kevinwatt/yt-dlp-mcp/issues"
+    "url": "https://github.com/9bingyin/youtube-mcp/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kevinwatt/yt-dlp-mcp.git"
+    "url": "git+https://github.com/9bingyin/youtube-mcp.git"
   },
   "bin": {
-    "yt-dlp-mcp": "lib/index.mjs"
+    "youtube-mcp": "lib/index.mjs"
   },
   "files": [
     "lib",
@@ -29,7 +33,7 @@
     "prepare": "tsc && shx chmod +x ./lib/index.mjs",
     "test": "PYTHONPATH= PYTHONHOME= node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit"
   },
-  "author": "Dewei Yen <k@funmula.com>",
+  "author": "Bingyin <realbingyin@outlook.com>",
   "license": "MIT",
   "type": "module",
   "exports": {

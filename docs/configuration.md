@@ -2,7 +2,7 @@
 
 ## Overview
 
-The yt-dlp-mcp package can be configured through environment variables or by passing a configuration object to the functions.
+The youtube-mcp package can be configured through environment variables. The configuration primarily focuses on subtitle extraction and file handling.
 
 ## Configuration Object
 
@@ -23,8 +23,6 @@ interface Config {
     required: readonly string[];
   };
   download: {
-    defaultResolution: "480p" | "720p" | "1080p" | "best";
-    defaultAudioFormat: "m4a" | "mp3";
     defaultSubtitleLanguage: string;
   };
 }
@@ -41,129 +39,117 @@ interface Config {
 | `YTDLP_SANITIZE_TRUNCATE_SUFFIX` | Suffix for truncated filenames | `...` |
 | `YTDLP_SANITIZE_ILLEGAL_CHARS` | Regex pattern for illegal characters | `/[<>:"/\\|?*\x00-\x1F]/g` |
 | `YTDLP_SANITIZE_RESERVED_NAMES` | Comma-separated list of reserved names | `CON,PRN,AUX,...` |
-| `YTDLP_DEFAULT_RESOLUTION` | Default video resolution | `720p` |
-| `YTDLP_DEFAULT_AUDIO_FORMAT` | Default audio format | `m4a` |
 | `YTDLP_DEFAULT_SUBTITLE_LANG` | Default subtitle language | `en` |
 
 ## File Configuration
 
 ### Download Directory
 
-The download directory can be configured in two ways:
+The download directory can be configured using environment variables:
 
-1. Environment variable:
 ```bash
 export YTDLP_DOWNLOADS_DIR="/path/to/downloads"
 ```
 
-2. Configuration object:
-```javascript
-const config = {
-  file: {
-    downloadsDir: "/path/to/downloads"
-  }
-};
-```
+Note: This is used for temporary file operations during subtitle extraction.
 
 ### Filename Sanitization
 
-Control how filenames are sanitized:
+Control how temporary filenames are sanitized:
 
-```javascript
-const config = {
-  file: {
-    maxFilenameLength: 100,
-    sanitize: {
-      replaceChar: '-',
-      truncateSuffix: '___',
-      illegalChars: /[<>:"/\\|?*\x00-\x1F]/g,
-      reservedNames: ['CON', 'PRN', 'AUX', 'NUL']
-    }
-  }
-};
+```bash
+export YTDLP_MAX_FILENAME_LENGTH=100
+export YTDLP_SANITIZE_REPLACE_CHAR="-"
+export YTDLP_SANITIZE_TRUNCATE_SUFFIX="___"
 ```
 
-## Download Configuration
+## Subtitle Configuration
 
-### Video Resolution
+### Default Language
 
-Set default video resolution:
+Set the default subtitle language when none is specified:
 
-```javascript
-const config = {
-  download: {
-    defaultResolution: "1080p" // "480p" | "720p" | "1080p" | "best"
-  }
-};
+```bash
+export YTDLP_DEFAULT_SUBTITLE_LANG="en"
 ```
 
-### Audio Format
-
-Configure audio format preferences:
-
-```javascript
-const config = {
-  download: {
-    defaultAudioFormat: "m4a" // "m4a" | "mp3"
-  }
-};
-```
-
-### Subtitle Language
-
-Set default subtitle language:
-
-```javascript
-const config = {
-  download: {
-    defaultSubtitleLanguage: "en"
-  }
-};
-```
+Supported language codes include:
+- `en` - English
+- `zh-Hans` - Simplified Chinese
+- `zh-Hant` - Traditional Chinese
+- `ja` - Japanese
+- `ko` - Korean
+- `es` - Spanish
+- `fr` - French
+- `de` - German
+- And many more...
 
 ## Tools Configuration
 
-Configure required external tools:
+The package requires `yt-dlp` to be installed and accessible in the system PATH:
 
-```javascript
-const config = {
-  tools: {
-    required: ['yt-dlp']
+```bash
+# Install yt-dlp based on your system
+# Windows
+winget install yt-dlp
+
+# macOS
+brew install yt-dlp
+
+# Linux
+pip install yt-dlp
+```
+
+## MCP Server Configuration
+
+When using with Claude Desktop or other MCP clients:
+
+```json
+{
+  "mcpServers": {
+    "youtube-subtitles": {
+      "command": "npx",
+      "args": ["-y", "@bingyin/youtube-mcp"],
+      "env": {
+        "YTDLP_DEFAULT_SUBTITLE_LANG": "en",
+        "YTDLP_MAX_FILENAME_LENGTH": "100"
+      }
+    }
   }
-};
+}
 ```
 
 ## Complete Configuration Example
 
+Environment setup:
+
+```bash
+# Basic configuration
+export YTDLP_DEFAULT_SUBTITLE_LANG="zh-Hans"
+export YTDLP_MAX_FILENAME_LENGTH=80
+export YTDLP_TEMP_DIR_PREFIX="subtitle-temp-"
+
+# Filename sanitization
+export YTDLP_SANITIZE_REPLACE_CHAR="-"
+export YTDLP_SANITIZE_TRUNCATE_SUFFIX="___"
+
+# Custom download directory (optional)
+export YTDLP_DOWNLOADS_DIR="/tmp/subtitle-extraction"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **yt-dlp not found**: Ensure yt-dlp is installed and in system PATH
+2. **Permission errors**: Check write permissions for download/temp directories
+3. **Language not available**: Use `get_available_subtitles` to check available languages first
+
+### Debug Mode
+
+For debugging, you can check the configuration being used:
+
 ```javascript
-import { CONFIG } from '@kevinwatt/yt-dlp-mcp';
-
-const customConfig = {
-  file: {
-    maxFilenameLength: 100,
-    downloadsDir: '/custom/downloads',
-    tempDirPrefix: 'ytdlp-temp-',
-    sanitize: {
-      replaceChar: '-',
-      truncateSuffix: '___',
-      illegalChars: /[<>:"/\\|?*\x00-\x1F]/g,
-      reservedNames: [
-        'CON', 'PRN', 'AUX', 'NUL',
-        'COM1', 'COM2', 'COM3', 'COM4', 'COM5',
-        'LPT1', 'LPT2', 'LPT3'
-      ]
-    }
-  },
-  tools: {
-    required: ['yt-dlp']
-  },
-  download: {
-    defaultResolution: '1080p',
-    defaultAudioFormat: 'm4a',
-    defaultSubtitleLanguage: 'en'
-  }
-};
-
-// Use the custom configuration
-const result = await downloadVideo(url, customConfig);
+import { CONFIG } from '@bingyin/youtube-mcp';
+console.log('Current configuration:', CONFIG);
 ``` 
